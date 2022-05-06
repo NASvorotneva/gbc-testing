@@ -2,7 +2,7 @@ from aiogram import Bot
 from aiogram.types import InlineKeyboardMarkup
 from aiogram.utils.exceptions import BotBlocked
 from gino import Gino
-from sqlalchemy import Column, Integer, String, Index, Sequence, ForeignKey
+from sqlalchemy import Column, Integer, String, Index, Sequence, ForeignKey, Boolean
 from sqlalchemy import sql
 from sqlalchemy.exc import InvalidRequestError
 
@@ -77,7 +77,6 @@ class Question(BaseModel):
     id = Column(Integer, Sequence('question_id_seq'), primary_key=True)
     test_id = Column(Integer, ForeignKey('tests.id'))
     text = Column(String(256))
-    right_answer_id = Column(Integer, ForeignKey('answers.id'))
 
     _idx = Index('question_id_index', 'id')
 
@@ -88,6 +87,7 @@ class Answer(BaseModel):
     id = Column(Integer, Sequence('answer_id_seq'), primary_key=True)
     question_id = Column(Integer, ForeignKey('questions.id'))
     text = Column(String(256))
+    is_right = Column(Boolean)
 
     _idx = Index('answer_id_index', 'id')
 
