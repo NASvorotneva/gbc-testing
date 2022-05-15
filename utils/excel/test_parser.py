@@ -1,6 +1,6 @@
 from typing import List
 
-from openpyxl.workbook.workbook import Workbook
+from openpyxl import Workbook
 
 FIRST_QUESTION_COLUMN_NUMBER = 1
 FIRST_QUESTION_ROW_NUMBER = 4

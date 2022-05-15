@@ -3,7 +3,7 @@ from typing import List
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 from keyboards.inline.callback_data import test_callback, start_test_callback, tests_callback, choose_answer_callback, \
-    choose_non_active_answer_callback, question_callback, finish_test_callback
+    choose_non_active_answer_callback, question_callback, finish_test_callback, check_test_results_callback
 from utils.db_api.database import Test, Answer
 
 
@@ -19,7 +19,7 @@ def tests_keyboard(tests: List[Test], user_result_ids: List[int]):
     return keyboard
 
 
-def test_keyboard(test_id: int, is_passed: bool):
+def test_keyboard(test_id: int, is_passed: bool, for_admin: bool):
     keyboard = InlineKeyboardMarkup(row_width=1)
     if is_passed:
         start_button_text = "Мои ответы"
@@ -29,6 +29,11 @@ def test_keyboard(test_id: int, is_passed: bool):
     keyboard.add(
         InlineKeyboardButton(text=start_button_text, callback_data=start_test_callback.new(test_id=test_id))
     )
+
+    if for_admin:
+        keyboard.add(InlineKeyboardButton(text="📑 Просмотреть результаты",
+                                          callback_data=check_test_results_callback.new(test_id=test_id)))
+
     keyboard.add(InlineKeyboardButton(text="🔙", callback_data=tests_callback.new()))
     return keyboard
 

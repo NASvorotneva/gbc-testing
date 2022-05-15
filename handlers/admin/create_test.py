@@ -8,7 +8,7 @@ from handlers.users.tests import bot_tests_command
 from loader import dp
 from states.admin import CreateTestState
 from utils.db_api.database import Test, Question, Answer
-from utils.test_parser import parse_tests
+from utils.excel.test_parser import parse_tests
 
 
 @dp.message_handler(commands=["create_test"], is_admin=True)

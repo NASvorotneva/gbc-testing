@@ -4,7 +4,7 @@ env = Env()
 env.read_env()
 
 BOT_TOKEN = env.str("BOT_TOKEN")
-ADMINS = env.list("ADMINS")
+ADMINS = [int(admin_id) for admin_id in env.list("ADMINS")]
 IP = env.str("ip")
 
 DATABASE_URL = env.str("DATABASE_URL")
