@@ -1,8 +1,10 @@
+from __future__ import annotations
+
 from aiogram import Bot
 from aiogram.types import InlineKeyboardMarkup
 from aiogram.utils.exceptions import BotBlocked
 from gino import Gino
-from sqlalchemy import Column, Integer, String, Index, Sequence, ForeignKey, Boolean
+from sqlalchemy import Column, Integer, String, Index, Sequence, ForeignKey, Boolean, and_
 from sqlalchemy import sql
 from sqlalchemy.exc import InvalidRequestError
 
@@ -15,25 +17,20 @@ class BaseModel(database.Model):
     query: sql.Select
 
     @classmethod
-    async def filter(cls, id: int):
-        return await cls.query.where(cls.id == id).gino.all()
+    async def get(cls, *args, select_values: list | tuple = ()):
+        if select_values:
+            return await cls.select(*select_values).where(and_(*args)).gino.first()
+        return await cls.query.where(and_(*args)).gino.first()
+
+    @classmethod
+    async def filter(cls, *args, select_values: list | tuple = ()):
+        if select_values:
+            return await cls.select(*select_values).where(and_(*args)).gino.all()
+        return await cls.query.where(and_(*args)).gino.all()
 
     @classmethod
     async def all(cls):
         return await cls.query.gino.all()
-
-    @classmethod
-    async def get(cls, id: int):
-        return await cls.query.where(cls.id == id).gino.first()
-
-    @classmethod
-    async def get_or_create(cls, **kwargs):
-        obj = None
-        if 'id' in kwargs:
-            obj = await cls.get(kwargs.get('id'))
-        if not obj:
-            obj = await cls.create(**kwargs)
-        return obj
 
     @classmethod
     async def count(cls) -> int:
@@ -49,6 +46,13 @@ class User(BaseModel):
     phone_number = Column(String(12))
 
     _idx = Index('user_id_index', 'id')
+
+    @classmethod
+    async def get_by_id_or_create(cls, id: int, **kwargs):
+        obj = await cls.get(cls.id == id)
+        if not obj:
+            obj = await cls.create(id=id, **kwargs)
+        return obj
 
     @staticmethod
     async def mailing(bot: Bot, text: str, keyboard: InlineKeyboardMarkup = None) -> int:
@@ -97,6 +101,7 @@ class UserAnswer(BaseModel):
 
     id = Column(Integer, Sequence('user_answer_id_seq'), primary_key=True)
     user_id = Column(Integer, ForeignKey('users.id'))
+    question_id = Column(Integer, ForeignKey('questions.id'))
     answer_id = Column(Integer, ForeignKey('answers.id'))
 
     _idx = Index('user_answer_id_index', 'id')
