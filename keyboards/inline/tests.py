@@ -35,13 +35,13 @@ def test_keyboard(test_id: int, is_passed: bool):
 
 def question_keyboard(
         test_id: int, answers: List[Answer], user_answer_id: int, prev_question_id: int, next_question_id: int,
-        is_active: bool
+        is_passed: bool
 ):
     keyboard = InlineKeyboardMarkup(row_width=2)
     for answer in answers:
-        if not is_active and answer.is_right:
+        if is_passed and answer.is_right:
             button_text = f"✅ {answer.text}"
-        elif not is_active and answer.id == user_answer_id and not answer.is_right:
+        elif is_passed and answer.id == user_answer_id and not answer.is_right:
             button_text = f"❌ {answer.text}"
         elif answer.id == user_answer_id:
             button_text = f"✔️ {answer.text}"
@@ -50,8 +50,8 @@ def question_keyboard(
         keyboard.add(
             InlineKeyboardButton(
                 text=button_text,
-                callback_data=choose_answer_callback.new(answer_id=answer.id) if is_active else
-                choose_non_active_answer_callback.new()
+                callback_data=choose_non_active_answer_callback.new() if is_passed else
+                choose_answer_callback.new(answer_id=answer.id)
             )
         )
 
@@ -66,7 +66,7 @@ def question_keyboard(
         nav_buttons.append(
             InlineKeyboardButton(text="🔜", callback_data=question_callback.new(question_id=next_question_id))
         )
-    elif is_active:
+    elif not is_passed:
         nav_buttons.append(
             InlineKeyboardButton(text="🏁", callback_data=finish_test_callback.new(test_id=test_id))
         )

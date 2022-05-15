@@ -64,7 +64,7 @@ async def bot_test_question_callback(call: CallbackQuery, callback_data: dict):
                                                                 user_answer_id=user_answer_id,
                                                                 prev_question_id=prev_question_id,
                                                                 next_question_id=next_question_id,
-                                                                is_active=not bool(user_result)))
+                                                                is_passed=bool(user_result)))
 
 
 @dp.callback_query_handler(start_test_callback.filter())
@@ -98,7 +98,7 @@ async def bot_test_choose_answer_callback(call: CallbackQuery, callback_data: di
                                                                         user_answer_id=answer.id,
                                                                         prev_question_id=prev_question_id,
                                                                         next_question_id=next_question_id,
-                                                                        is_active=not bool(user_result)))
+                                                                        is_passed=bool(user_result)))
 
 
 @dp.callback_query_handler(finish_test_callback.filter())
