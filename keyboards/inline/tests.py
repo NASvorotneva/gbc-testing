@@ -3,7 +3,8 @@ from typing import List
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 from keyboards.inline.callback_data import test_callback, start_test_callback, tests_callback, choose_answer_callback, \
-    choose_non_active_answer_callback, question_callback, finish_test_callback, check_test_results_callback
+    choose_non_active_answer_callback, question_callback, finish_test_callback, check_test_results_callback, \
+    delete_test_callback
 from utils.db_api.database import Test, Answer
 
 
@@ -33,6 +34,7 @@ def test_keyboard(test_id: int, is_passed: bool, for_admin: bool):
     if for_admin:
         keyboard.add(InlineKeyboardButton(text="📑 Просмотреть результаты",
                                           callback_data=check_test_results_callback.new(test_id=test_id)))
+        keyboard.add(InlineKeyboardButton(text="❌ Удалить", callback_data=delete_test_callback.new(test_id=test_id)))
 
     keyboard.add(InlineKeyboardButton(text="🔙", callback_data=tests_callback.new()))
     return keyboard

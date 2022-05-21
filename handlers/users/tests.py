@@ -1,13 +1,12 @@
 from aiogram import types
-from aiogram.types import CallbackQuery, InputFile
+from aiogram.types import CallbackQuery
 
 from data.config import ADMINS
 from keyboards.inline.callback_data import test_callback, tests_callback, start_test_callback, question_callback, \
-    choose_answer_callback, finish_test_callback, choose_non_active_answer_callback, check_test_results_callback
+    choose_answer_callback, finish_test_callback, choose_non_active_answer_callback
 from keyboards.inline.tests import tests_keyboard, test_keyboard, question_keyboard
 from loader import dp
 from utils.db_api.database import Test, Result, Question, Answer, UserAnswer
-from utils.excel.results_exporter import export_test_results
 from utils.misc.tests import get_prev_and_next_question_id
 
 
@@ -47,7 +46,7 @@ async def bot_test_callback(call: CallbackQuery, callback_data: dict):
         text = f"🧑🏻‍🏫 <b>{test.name}</b>\n\n{short_info_text}\n"
 
     await call.message.edit_text(text=text, reply_markup=test_keyboard(test_id=test.id, is_passed=bool(user_result),
-                                 for_admin=call.from_user.id in ADMINS))
+                                                                       for_admin=call.from_user.id in ADMINS))
 
 
 @dp.callback_query_handler(question_callback.filter())
@@ -134,12 +133,3 @@ async def bot_test_finish_callback(call: CallbackQuery, callback_data: dict):
 @dp.callback_query_handler(choose_non_active_answer_callback.filter())
 async def bot_test_choose_non_active_answer_callback(call: CallbackQuery, callback_data: dict):
     await call.answer("🧑🏻‍🏫 Нельзя изменить ответ, тест уже пройден!")
-
-
-@dp.callback_query_handler(check_test_results_callback.filter())
-async def bot_test_check_results_callback(call: CallbackQuery, callback_data: dict):
-    test = await Test.get(Test.id == int(callback_data['test_id']))
-    bytes_io = await export_test_results(test=test)
-    document = InputFile(path_or_bytesio=bytes_io, filename=f"{test.name}.xlsx")
-
-    await call.message.answer_document(document=document)
