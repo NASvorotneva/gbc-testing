@@ -6,8 +6,12 @@ from loader import dp
 
 @dp.message_handler(CommandHelp())
 async def bot_help_command(message: types.Message):
-    text = ("Список команд: ",
-            "/start - Начать диалог",
-            "/help - Получить справку")
-    
+    text = (
+        "Список команд:",
+        "/start - Начать диалог",
+        "/help - Получить справку",
+        "/tests - Получить список доступных тестов",
+        "/create_test - [АДМИН] Добавить новый тест",
+    )
+
     await message.answer("\n".join(text))

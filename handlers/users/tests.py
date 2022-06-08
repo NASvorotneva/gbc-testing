@@ -2,6 +2,7 @@ from aiogram import types
 from aiogram.types import CallbackQuery
 
 from data.config import ADMINS
+from keyboards.default.start import TESTS_BUTTON
 from keyboards.inline.callback_data import test_callback, tests_callback, start_test_callback, question_callback, \
     choose_answer_callback, finish_test_callback, choose_non_active_answer_callback
 from keyboards.inline.tests import tests_keyboard, test_keyboard, question_keyboard
@@ -10,6 +11,7 @@ from utils.db_api.database import Test, Result, Question, Answer, UserAnswer
 from utils.misc.tests import get_prev_and_next_question_id
 
 
+@dp.message_handler(text=TESTS_BUTTON)
 @dp.message_handler(commands=["tests"])
 async def bot_tests_command(message: types.Message):
     tests = await Test.all()
@@ -61,7 +63,9 @@ async def bot_test_question_callback(call: CallbackQuery, callback_data: dict):
     question_number = [index + 1 for index, value in enumerate(questions) if question.id == value[0]][0]
     prev_question_id, next_question_id = get_prev_and_next_question_id(question_id=question.id, questions=questions)
 
-    await call.message.edit_text(text=f"{question_number}. {question.text}",
+    answers_text = '\n'.join(f"{index + 1}. {answer.text}" for index, answer in enumerate(answers))
+
+    await call.message.edit_text(text=f"{question_number}. {question.text}\n\n{answers_text}",
                                  reply_markup=question_keyboard(test_id=question.test_id, answers=answers,
                                                                 user_answer_id=user_answer_id,
                                                                 prev_question_id=prev_question_id,
@@ -71,11 +75,7 @@ async def bot_test_question_callback(call: CallbackQuery, callback_data: dict):
 
 @dp.callback_query_handler(start_test_callback.filter())
 async def bot_test_start_callback(call: CallbackQuery, callback_data: dict):
-    user_result = await Result.get(Result.user_id == call.from_user.id, Result.test_id == int(callback_data['test_id']))
     questions = await Question.filter(Question.test_id == int(callback_data['test_id']), select_values=['id'])
-
-    if user_result:
-        await call.answer(text="🧑🏻‍🏫 Тест уже пройден!")
 
     await bot_test_question_callback(call=call, callback_data={"question_id": questions[0][0]})
 
@@ -96,11 +96,14 @@ async def bot_test_choose_answer_callback(call: CallbackQuery, callback_data: di
         else:
             await UserAnswer.create(user_id=call.from_user.id, question_id=question.id, answer_id=answer.id)
 
-    await call.message.edit_reply_markup(reply_markup=question_keyboard(test_id=question.test_id, answers=answers,
-                                                                        user_answer_id=answer.id,
-                                                                        prev_question_id=prev_question_id,
-                                                                        next_question_id=next_question_id,
-                                                                        is_passed=bool(user_result)))
+    if next_question_id is None:
+        await call.message.edit_reply_markup(reply_markup=question_keyboard(test_id=question.test_id, answers=answers,
+                                                                            user_answer_id=answer.id,
+                                                                            prev_question_id=prev_question_id,
+                                                                            next_question_id=next_question_id,
+                                                                            is_passed=bool(user_result)))
+    else:
+        await bot_test_question_callback(call=call, callback_data={"question_id": next_question_id})
 
 
 @dp.callback_query_handler(finish_test_callback.filter())

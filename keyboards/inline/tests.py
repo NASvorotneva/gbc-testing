@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
@@ -41,8 +41,8 @@ def test_keyboard(test_id: int, is_passed: bool, for_admin: bool):
 
 
 def question_keyboard(
-        test_id: int, answers: List[Answer], user_answer_id: int, prev_question_id: int, next_question_id: int,
-        is_passed: bool
+        test_id: int, answers: List[Answer], user_answer_id: int, prev_question_id: Optional[int],
+        next_question_id: Optional[int], is_passed: bool
 ):
     keyboard = InlineKeyboardMarkup(row_width=2)
     for answer in answers:

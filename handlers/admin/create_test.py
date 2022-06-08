@@ -2,7 +2,7 @@ from io import BytesIO
 
 import openpyxl
 from aiogram.dispatcher import FSMContext
-from aiogram.types import Message
+from aiogram.types import Message, InputFile
 
 from handlers.users.tests import bot_tests_command
 from loader import dp
@@ -14,7 +14,8 @@ from utils.excel.test_parser import parse_tests
 @dp.message_handler(commands=["create_test"], is_admin=True)
 async def bot_create_test_command(message: Message):
     await CreateTestState.test.set()
-    await message.answer("🧑🏻‍🏫 Загрузи тест в формате .xls/.xlsx")
+    await message.answer_document(document=InputFile("./utils/excel/test-template.xlsx"),
+                                  caption="🧑🏻‍🏫 Загрузи тест в формате .xls/.xlsx по прикрепленному примеру")
 
 
 @dp.message_handler(content_types=["document"], is_admin=True, state=CreateTestState.test)
